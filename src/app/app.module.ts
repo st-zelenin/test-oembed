@@ -3,6 +3,8 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { PolicyComponent } from './policy/policy.component';
+import { BrandsComponent } from './brands/brands.component';
 
 function initializeApp(): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -56,7 +58,9 @@ function initializeApp(): Promise<void> {
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    PolicyComponent,
+    BrandsComponent
   ],
   imports: [
     BrowserModule,
