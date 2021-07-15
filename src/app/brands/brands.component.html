@@ -40,12 +40,11 @@
     </div>
   </div>
 
-  <div *ngIf="selectedBrand" class="content">
-    <h2>{{selectedBrand.name}}</h2>
+  <div class="brand-details" [class.visible]="selectedBrand">
+    <h2>{{selectedBrand?.name}}</h2>
     <p>Here is the Facebook page for the selected brand:</p>
 
-    <iframe *ngIf="embeddedContent" [style.height.px]="embeddedContent.height" [style.width.px]="embeddedContent.width"
-      [srcdoc]="embeddedContent.html">
-    </iframe>
+    <div #embeddedContentContainer class="embedded-content">
+    </div>
   </div>
 </div>

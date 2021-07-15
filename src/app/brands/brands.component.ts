@@ -1,5 +1,4 @@
-import { Component, SecurityContext } from '@angular/core';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 
 interface Brand {
   name: string;
@@ -22,12 +21,6 @@ interface OEmbedResponse {
   html: string;
 }
 
-interface EmbeddedContent {
-  height: number;
-  width: number;
-  html: SafeHtml;
-}
-
 @Component({
   selector: 'app-brands',
   templateUrl: './brands.component.html',
@@ -43,9 +36,8 @@ export class BrandsComponent {
   ];
 
   selectedBrand: Brand | undefined = undefined;
-  embeddedContent: EmbeddedContent | undefined = undefined;
 
-  constructor(private sanitizer: DomSanitizer) { }
+  @ViewChild('embeddedContentContainer') embeddedContentContainer: ElementRef<HTMLDivElement> | undefined = undefined;
 
   selectBrand(brand: Brand) {
     if (brand === this.selectedBrand) {
@@ -55,23 +47,39 @@ export class BrandsComponent {
 
     this.selectedBrand = brand;
 
-    const params: OEmbedParams = { url: brand.url, omitscript: false, adapt_container_width: true, maxheight: 1000, maxwidth: 1000 };
+    // [class.visible] should apply first
+    // to update height/width of the container
+    setTimeout(() => this.getBrandPage());
+  }
+
+  private getBrandPage() {
+    if (!this.embeddedContentContainer || !this.selectedBrand) {
+      return;
+    }
+
+    const { clientHeight, clientWidth } = this.embeddedContentContainer.nativeElement;
+
+
+    const params: OEmbedParams = {
+      url: this.selectedBrand.url,
+      omitscript: true,             // SDK and 'div.fb-root' are already initialized
+      adapt_container_width: false,
+      maxheight: clientHeight,
+      maxwidth: clientWidth,
+    };
+
     FB.api<OEmbedParams, OEmbedResponse>(
       "/oembed_page",
       params,
       (response) => {
-        if (!response || response.error) {
-          this.embeddedContent = {
-            height: 200,
-            width: 200,
-            html: this.sanitizer.sanitize(SecurityContext.HTML, response.error?.message || '') || ''
-          }
-        } else {
-          this.embeddedContent = {
-            height: 1000, //response.height,
-            width: 1000, //response.width,
-            html: this.sanitizer.bypassSecurityTrustHtml(response.html)
-          };
+        const innerHTML = response && !response.error ? response.html : response.error?.message || '';
+
+        if (this.embeddedContentContainer) {
+          const container = this.embeddedContentContainer.nativeElement as HTMLDivElement;
+          container.innerHTML = innerHTML;
+
+          // triggers 'div.fb-page' rendering
+          FB.XFBML.parse(container);
         }
       }
     );
