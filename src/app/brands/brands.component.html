@@ -43,9 +43,9 @@
   <div *ngIf="selectedBrand" class="content">
     <h2>{{selectedBrand.name}}</h2>
     <p>Here is the Facebook page for the selected brand:</p>
-    <div *ngIf="embeddedContent" [style.height.px]="embeddedContent.height" [style.width.px]="embeddedContent.width"
-      [innerHTML]="embeddedContent.html" class="embedded-content">
-    </div>
-  </div>
 
+    <iframe *ngIf="embeddedContent" [style.height.px]="embeddedContent.height" [style.width.px]="embeddedContent.width"
+      [srcdoc]="embeddedContent.html">
+    </iframe>
+  </div>
 </div>

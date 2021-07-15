@@ -1,5 +1,5 @@
 import { Component, SecurityContext } from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 interface Brand {
   name: string;
@@ -8,13 +8,24 @@ interface Brand {
 
 interface OEmbedParams {
   url: string;
+  omitscript: boolean;
+  adapt_container_width: boolean;
+  maxheight?: number;
+  maxwidth?: number;
 }
+
 interface OEmbedResponse {
   error?: { message: string; };
 
   height: number;
   width: number;
   html: string;
+}
+
+interface EmbeddedContent {
+  height: number;
+  width: number;
+  html: SafeHtml;
 }
 
 @Component({
@@ -32,14 +43,19 @@ export class BrandsComponent {
   ];
 
   selectedBrand: Brand | undefined = undefined;
-  embeddedContent: OEmbedResponse | undefined = undefined;
+  embeddedContent: EmbeddedContent | undefined = undefined;
 
   constructor(private sanitizer: DomSanitizer) { }
 
   selectBrand(brand: Brand) {
-    this.selectedBrand = brand === this.selectedBrand ? undefined : brand;
+    if (brand === this.selectedBrand) {
+      this.selectedBrand = undefined;
+      return;
+    }
 
-    const params: OEmbedParams = { url: brand.url };
+    this.selectedBrand = brand;
+
+    const params: OEmbedParams = { url: brand.url, omitscript: false, adapt_container_width: true, maxheight: 1000, maxwidth: 1000 };
     FB.api<OEmbedParams, OEmbedResponse>(
       "/oembed_page",
       params,
@@ -51,10 +67,13 @@ export class BrandsComponent {
             html: this.sanitizer.sanitize(SecurityContext.HTML, response.error?.message || '') || ''
           }
         } else {
-          this.embeddedContent = response;
+          this.embeddedContent = {
+            height: 1000, //response.height,
+            width: 1000, //response.width,
+            html: this.sanitizer.bypassSecurityTrustHtml(response.html)
+          };
         }
       }
     );
   }
-
 }
