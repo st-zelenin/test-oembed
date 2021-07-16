@@ -5,54 +5,20 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { PolicyComponent } from './policy/policy.component';
 import { BrandsComponent } from './brands/brands.component';
+import { ExtendedWindow } from './models';
+import { FacebookService } from './facebook.service';
+import { DOCUMENT } from '@angular/common';
 
-function initializeApp(): Promise<void> {
-  return new Promise((resolve, reject) => {
+function initializeAppFactory(fb: FacebookService, doc: Document): () => Promise<void> {
+  return () => new Promise<void>((resolve) => {
 
-    const extendedWindow = window as unknown as any;
-    extendedWindow.fbAsyncInit = function () {
-      FB.init({
-        appId: extendedWindow.APP_ID,
-        cookie: true,
-        autoLogAppEvents: true,
-        xfbml: true,
-        version: 'v11.0'
-      });
-
-      FB.getLoginStatus((response) => {
-        console.log('auth response', response);
-
-        if (!response.authResponse) {
-          FB.login((response) => {
-            if (response.authResponse) {
-              console.log('Welcome!  Fetching your information.... ');
-
-              FB.api('/me', (response: { name: string }) => {
-                console.log('Good to see you, ' + response.name + '.');
-              });
-
-              resolve();
-            } else {
-              console.log('User cancelled login or did not fully authorize.');
-            }
-          });
-        } else {
-          resolve();
-        }
-      });
+    const extendedWindow: ExtendedWindow = window as unknown as ExtendedWindow;
+    extendedWindow.fbAsyncInit = () => {
+      fb.init(extendedWindow.APP_ID, extendedWindow.FB_TOKEN);
+      fb.logIn().then(resolve);
     };
 
-    (function (d) {
-      if (d.getElementById('facebook-jssdk')) {
-        return;
-      }
-
-      const firstScript = d.getElementsByTagName('script')[0];
-      const sdkScript = d.createElement('script');
-      sdkScript.id = 'facebook-jssdk';
-      sdkScript.src = "https://connect.facebook.net/en_US/sdk.js";
-      firstScript.parentNode!.insertBefore(sdkScript, firstScript);
-    }(document));
+    fb.injectScripts(doc);
   });
 }
 
@@ -68,8 +34,9 @@ function initializeApp(): Promise<void> {
   ],
   providers: [{
     provide: APP_INITIALIZER,
-    useFactory: () => initializeApp,
-    multi: true
+    useFactory: initializeAppFactory,
+    multi: true,
+    deps: [FacebookService, DOCUMENT],
   }],
   bootstrap: [AppComponent]
 })

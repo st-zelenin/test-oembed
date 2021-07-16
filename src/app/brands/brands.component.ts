@@ -1,25 +1,6 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
-
-interface Brand {
-  name: string;
-  url: string;
-}
-
-interface OEmbedParams {
-  url: string;
-  omitscript: boolean;
-  adapt_container_width: boolean;
-  maxheight?: number;
-  maxwidth?: number;
-}
-
-interface OEmbedResponse {
-  error?: { message: string; };
-
-  height: number;
-  width: number;
-  html: string;
-}
+import { FacebookService } from '../facebook.service';
+import { Brand } from '../models';
 
 @Component({
   selector: 'app-brands',
@@ -39,6 +20,8 @@ export class BrandsComponent {
 
   @ViewChild('embeddedContentContainer') embeddedContentContainer: ElementRef<HTMLDivElement> | undefined = undefined;
 
+  constructor(private facebookService: FacebookService) {}
+
   selectBrand(brand: Brand) {
     if (brand === this.selectedBrand) {
       this.selectedBrand = undefined;
@@ -52,36 +35,21 @@ export class BrandsComponent {
     setTimeout(() => this.getBrandPage());
   }
 
-  private getBrandPage() {
+  private async getBrandPage() {
     if (!this.embeddedContentContainer || !this.selectedBrand) {
       return;
     }
 
     const { clientHeight, clientWidth } = this.embeddedContentContainer.nativeElement;
 
+    const response = await this.facebookService.getBrandPage(this.selectedBrand.url, clientHeight, clientWidth);
+    const innerHTML = response && !response.error ? response.html : response.error?.message || '';
+  
+    if (this.embeddedContentContainer) {
+      const container = this.embeddedContentContainer.nativeElement as HTMLDivElement;
+      container.innerHTML = innerHTML;
 
-    const params: OEmbedParams = {
-      url: this.selectedBrand.url,
-      omitscript: true,             // SDK and 'div.fb-root' are already initialized
-      adapt_container_width: false,
-      maxheight: clientHeight,
-      maxwidth: clientWidth,
-    };
-
-    FB.api<OEmbedParams, OEmbedResponse>(
-      "/oembed_page",
-      params,
-      (response) => {
-        const innerHTML = response && !response.error ? response.html : response.error?.message || '';
-
-        if (this.embeddedContentContainer) {
-          const container = this.embeddedContentContainer.nativeElement as HTMLDivElement;
-          container.innerHTML = innerHTML;
-
-          // triggers 'div.fb-page' rendering
-          FB.XFBML.parse(container);
-        }
-      }
-    );
+      this.facebookService.renderBrandPage(container);
+    }
   }
 }
