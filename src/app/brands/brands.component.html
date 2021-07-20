@@ -1,5 +1,4 @@
 <div class="content" role="main">
-
   <div class="card highlight-card card-small">
 
     <svg id="rocket" xmlns="http://www.w3.org/2000/svg" width="101.678" height="101.678" viewBox="0 0 101.678 101.678">
@@ -19,32 +18,38 @@
     </svg>
 
     <span>Test oEmbed app is running!</span>
-
-    <svg id="rocket-smoke" xmlns="http://www.w3.org/2000/svg" width="516.119" height="1083.632"
-      viewBox="0 0 516.119 1083.632">
-      <title>Rocket Ship Smoke</title>
-      <path id="Path_40" data-name="Path 40"
-        d="M644.6,141S143.02,215.537,147.049,870.207s342.774,201.755,342.774,201.755S404.659,847.213,388.815,762.2c-27.116-145.51-11.551-384.124,271.9-609.1C671.15,139.365,644.6,141,644.6,141Z"
-        transform="translate(-147.025 -140.939)" fill="#f5f5f5" />
-    </svg>
-
   </div>
 
   <h2>Brands</h2>
-  <p>Here are some brands to view:</p>
 
-  <div class="card-container">
-    <div *ngFor="let brand of brands" class="card" (click)="selectBrand(brand)"
-      [class.active]="selectedBrand === brand">
-      {{brand.name}}
+  <div class="form-container">
+    <form class="brands-form" (ngSubmit)="onSubmit()">
+      <mat-form-field class="brands-autocomplete" appearance="fill">
+        <mat-label>Brand name</mat-label>
+        <input type="text" placeholder="Pick one or type any other" aria-label="Brand" matInput
+          [formControl]="brandInputControl" [matAutocomplete]="auto">
+        <button *ngIf="brandInputControl.value" matSuffix mat-icon-button aria-label="Clear" (click)="clear()">
+          <mat-icon>close</mat-icon>
+        </button>
+        <mat-autocomplete #auto="matAutocomplete">
+          <mat-option *ngFor="let brand of filteredOptions | async" [value]="brand">
+            {{brand}}
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+      <button type="submit" mat-fab color="primary" aria-label="Open Facebook page" class="facebook-button">
+        <mat-icon inline>facebook</mat-icon>
+      </button>
+    </form>
+  </div>
+
+  <div #brandDetails style="height: 80%; width: 80%;">
+    <div class="brand-details" [class.visible]="selectedBrand">
+      <h2>{{selectedBrand}}</h2>
+      <p>Here is the Facebook page for the selected brand:</p>
+
+      <div class="embedded-content" #embeddedContentContainer></div>
     </div>
   </div>
 
-  <div class="brand-details" [class.visible]="selectedBrand">
-    <h2>{{selectedBrand?.name}}</h2>
-    <p>Here is the Facebook page for the selected brand:</p>
-
-    <div #embeddedContentContainer class="embedded-content">
-    </div>
-  </div>
 </div>
