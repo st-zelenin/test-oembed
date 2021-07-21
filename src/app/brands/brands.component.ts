@@ -17,6 +17,8 @@ export class BrandsComponent implements OnInit {
   brandInputControl = new FormControl();
   filteredOptions: Observable<string[]> | undefined = undefined;
 
+  private readonly TITLE_SIZE = 40; // the size of `h2` in the section of the embedded page/post
+
   @ViewChild('brandDetails') brandDetails: ElementRef<HTMLDivElement> | undefined = undefined;
   @ViewChild('embeddedContentContainer') embeddedContentContainer: ElementRef<HTMLDivElement> | undefined = undefined;
 
@@ -29,9 +31,14 @@ export class BrandsComponent implements OnInit {
     );
   }
 
-  onSubmit() {
+  showFacebookPage() {
     this.selectedBrand = this.brandInputControl.value;
-    this.getBrandPage();
+    this.embedFacebookPage();
+  }
+
+  showInstagramPage() {
+    this.selectedBrand = this.brandInputControl.value;
+    this.embedInstagramPost();
   }
 
   clear() {
@@ -39,7 +46,7 @@ export class BrandsComponent implements OnInit {
     this.selectedBrand = undefined;
   }
 
-  private async getBrandPage() {
+  private async embedFacebookPage() {
     if (!this.embeddedContentContainer || !this.brandDetails || !this.selectedBrand) {
       return;
     }
@@ -47,16 +54,30 @@ export class BrandsComponent implements OnInit {
     const { clientHeight, clientWidth } = this.brandDetails.nativeElement;
 
     const url = `https://www.facebook.com/${this.selectedBrand}`;
-    const titleSize = 50; // this is the size of the `h2` and the `p`
-    const response = await this.facebookService.getBrandPage(url, clientHeight - titleSize, clientWidth);
+    const response = await this.facebookService.getFacebookPage(url, clientHeight - this.TITLE_SIZE, clientWidth)
+
     const innerHTML = response && !response.error ? response.html : response.error?.message || '';
+    const container = this.embeddedContentContainer.nativeElement as HTMLDivElement;
+    container.innerHTML = innerHTML;
 
-    if (this.embeddedContentContainer) {
-      const container = this.embeddedContentContainer.nativeElement as HTMLDivElement;
-      container.innerHTML = innerHTML;
+    this.facebookService.renderBrandPage(container);
+  }
 
-      this.facebookService.renderBrandPage(container);
+  private async embedInstagramPost() {
+    if (!this.embeddedContentContainer || !this.brandDetails || !this.selectedBrand) {
+      return;
     }
+
+    const { clientWidth } = this.brandDetails.nativeElement;
+
+    const url = `https://www.instagram.com/p/${this.selectedBrand}/`;
+    const response = await this.facebookService.getInstagramPost(url, clientWidth - this.TITLE_SIZE);
+
+    const innerHTML = response && !response.error ? response.html : response.error?.message || '';
+    const container = this.embeddedContentContainer.nativeElement as HTMLDivElement;
+    container.innerHTML = innerHTML;
+
+    this.facebookService.renderInstagramPost();
   }
 
   private filterBrands(value: string): string[] {

@@ -7,7 +7,7 @@
     "build": "ng build --base-href=./",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "deploy": "npm run build && gh-pages -d dist/test-oembed"
+    "deploy": "npm run build && gh-pages -d dist/test-oembed -e instagram"
   },
   "private": true,
   "dependencies": {

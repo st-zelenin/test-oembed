@@ -74,9 +74,6 @@ svg#rocket {
 }
 
 .embedded-content {
-  width: 700px;
-  height: 700px;
-
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -104,6 +101,11 @@ svg#rocket {
 
     .facebook-button {
       font-size: 52px;
+    }
+
+    .instagram-button {
+      font-size: 44px;
+      margin-left: 10px;
     }
   }
 }

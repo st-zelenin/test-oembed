@@ -23,9 +23,9 @@
   <h2>Brands</h2>
 
   <div class="form-container">
-    <form class="brands-form" (ngSubmit)="onSubmit()">
+    <form class="brands-form">
       <mat-form-field class="brands-autocomplete" appearance="fill">
-        <mat-label>Brand name</mat-label>
+        <mat-label>Brand name or Post ID</mat-label>
         <input type="text" placeholder="Pick one or type any other" aria-label="Brand" matInput
           [formControl]="brandInputControl" [matAutocomplete]="auto">
         <button *ngIf="brandInputControl.value" matSuffix mat-icon-button aria-label="Clear" (click)="clear()">
@@ -37,16 +37,20 @@
           </mat-option>
         </mat-autocomplete>
       </mat-form-field>
-      <button type="submit" mat-fab color="primary" aria-label="Open Facebook page" class="facebook-button">
+      <button type="button" mat-fab color="primary" aria-label="Open Facebook page" class="facebook-button"
+        (click)="showFacebookPage()">
         <mat-icon inline>facebook</mat-icon>
+      </button>
+      <button type="button" mat-fab color="primary" aria-label="Open Instagram post" class="instagram-button"
+        (click)="showInstagramPage()">
+        <mat-icon inline>photo_camera</mat-icon>
       </button>
     </form>
   </div>
 
-  <div #brandDetails style="height: 80%; width: 80%;">
+  <div #brandDetails style="min-height: 80%; width: 80%;">
     <div class="brand-details" [class.visible]="selectedBrand">
       <h2>{{selectedBrand}}</h2>
-      <p>Here is the Facebook page for the selected brand:</p>
 
       <div class="embedded-content" #embeddedContentContainer></div>
     </div>

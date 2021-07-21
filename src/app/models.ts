@@ -4,15 +4,10 @@ export interface ExtendedWindow extends Window {
   FB_TOKEN: string;
 }
 
-export interface Brand {
-  name: string;
-  url: string;
-}
-
 export interface OEmbedParams {
   url: string;
   omitscript: boolean;
-  adapt_container_width: boolean;
+  adapt_container_width?: boolean;
   maxheight?: number;
   maxwidth?: number;
   access_token?: string;

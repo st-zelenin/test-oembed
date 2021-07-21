@@ -63,7 +63,7 @@ export class FacebookService {
     firstScript.parentNode!.insertBefore(sdkScript, firstScript);
   }
 
-  getBrandPage(url: string, maxheight: number, maxwidth: number): Promise<OEmbedResponse> {
+  getFacebookPage(url: string, maxheight: number, maxwidth: number): Promise<OEmbedResponse> {
     return new Promise<OEmbedResponse>((resolve) => {
       const params: OEmbedParams = {
         url,
@@ -85,8 +85,33 @@ export class FacebookService {
     });
   }
 
+  getInstagramPost(url: string, maxwidth: number): Promise<OEmbedResponse> {
+    return new Promise<OEmbedResponse>((resolve) => {
+      const params: OEmbedParams = {
+        url,
+        omitscript: true,             // SDK and 'div.fb-root' are already initialized
+        // adapt_container_width: false,
+        maxwidth,
+      };
+
+      if (this.token) {
+        params.access_token = this.token;
+      }
+
+      FB.api<OEmbedParams, OEmbedResponse>(
+        "/instagram_oembed",
+        params,
+        (response) => resolve(response)
+      );
+    });
+  }
+
   renderBrandPage(container: HTMLElement): void {
     // triggers 'div.fb-page' rendering
     FB.XFBML.parse(container);
+  }
+
+  renderInstagramPost() {
+    instgrm.Embeds.process();
   }
 }
